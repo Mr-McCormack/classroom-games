@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture the Flag</title>
+<style>
+  :root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#ddd6c8;--accent:#1d7bd8;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  button{font:inherit;cursor:pointer;border:0;border-radius:10px}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  /* Setup */
+  #setup{max-width:460px;margin:8vh auto;padding:32px;background:var(--card);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+  #setup h1{margin:0 0 4px;font-size:2.2rem}
+  #setup p{margin:0 0 24px;color:var(--muted)}
+  .field{display:flex;align-items:center;justify-content:space-between;margin:14px 0;font-size:1.2rem;font-weight:600}
+  .stepper{display:flex;align-items:center;gap:8px}
+  .stepper button{width:44px;height:44px;font-size:1.5rem;background:#eee8dc}
+  .stepper input{width:70px;height:44px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid var(--line);border-radius:10px}
+  .big{width:100%;padding:16px;margin-top:18px;font-size:1.25rem;font-weight:700;background:var(--accent);color:#fff}
+  .ghost{width:100%;padding:12px;margin-top:10px;font-size:1rem;background:#eee8dc;color:var(--ink)}
+  /* Game */
+  #game{padding:16px 20px 30px}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  header h1{margin:0;font-size:1.6rem;margin-right:auto}
+  header button{padding:10px 16px;font-weight:600;background:#fff;border:2px solid var(--line)}
+  #banner{padding:14px 18px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:1.25rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+  #banner.steal{background:#fff7d6;border-color:#f4a300}
+  #banner span{margin-right:auto}
+  #banner button{padding:8px 14px;background:#fff;border:2px solid #f4a300;font-weight:600}
+  #grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+  .card{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.07);border:4px solid transparent;display:flex;flex-direction:column;transition:transform .15s,border-color .15s}
+  .bar{height:12px}
+  .body{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px}
+  .name{font-size:1.35rem;font-weight:700;background:none;padding:0;text-align:left;color:var(--ink)}
+  .name:hover{text-decoration:underline dotted}
+  .count{font-size:3.6rem;font-weight:800;line-height:1}
+  .count small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:6px}
+  .flags{display:flex;flex-wrap:wrap;gap:3px;min-height:30px}
+  .flags svg{width:24px;height:28px}
+  .row{display:flex;gap:8px}
+  .correct{flex:1;padding:14px;font-size:1.15rem;font-weight:700;color:#fff;background:#2a9d4a}
+  .adj{width:46px;font-size:1.3rem;font-weight:700;background:#eee8dc}
+  .card.out .count{color:#b8b2a6}
+  .card.winner{border-color:#2a9d4a;transform:scale(1.02)}
+  .card.target{border-color:#f4a300;cursor:pointer}
+  .card.target:hover{transform:scale(1.03);box-shadow:0 8px 24px rgba(244,163,0,.35)}
+  .card.target.empty{border-color:transparent;opacity:.45;cursor:not-allowed}
+  .card.dim{opacity:.55}
+  .takehint{display:none;padding:12px;text-align:center;font-weight:700;font-size:1.1rem;background:#f4a300;color:#fff;border-radius:10px}
+  .card.target .takehint{display:block}
+  .card.target.empty .takehint{background:#b8b2a6}
+  .card.target .row{display:none}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .gain{animation:pop .45s ease}
+  .lose{animation:shake .35s ease}
+</style>
+</head>
+<body>
+
+<div id="setup">
+  <h1>🚩 Capture the Flag</h1>
+  <p>Right answer? Take a flag from another group.</p>
+  <div class="field">Groups
+    <div class="stepper"><button data-step="nGroups" data-d="-1">−</button><input id="nGroups" type="number" min="2" max="12" value="4"><button data-step="nGroups" data-d="1">+</button></div>
+  </div>
+  <div class="field">Flags per group
+    <div class="stepper"><button data-step="nFlags" data-d="-1">−</button><input id="nFlags" type="number" min="1" max="50" value="5"><button data-step="nFlags" data-d="1">+</button></div>
+  </div>
+  <button class="big" id="startBtn">Start game</button>
+  <button class="ghost" id="resumeBtn" hidden>Resume saved game</button>
+</div>
+
+<div id="game" hidden>
+  <header>
+    <h1>🚩 Capture the Flag</h1>
+    <button id="undoBtn">↶ Undo</button>
+    <button id="newBtn">New game</button>
+  </header>
+  <div id="banner"></div>
+  <div id="grid"></div>
+</div>
+
+<script>
+const COLORS=['#e63946','#1d7bd8','#2a9d4a','#f4a300','#8e44ad','#e76f51','#0fa3b1','#d63384','#5a3e2b','#3a86ff','#80b918','#6c757d'];
+const KEY='flaggrab-v1';
+let S=null, pending=null, lastMove=null;
+
+const $=id=>document.getElementById(id);
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.round(Number(v)||lo)));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.groups)&&s.groups.length)return s}catch(e){}return null}
+
+// Setup
+document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
+  const inp=$(b.dataset.step); inp.value=clamp(+inp.value+ +b.dataset.d,+inp.min,+inp.max);
+});
+$('startBtn').onclick=()=>{
+  const n=clamp($('nGroups').value,2,12), f=clamp($('nFlags').value,1,50);
+  S={groups:Array.from({length:n},(_,i)=>({name:'Group '+(i+1),flags:f})),history:[]};
+  save(); showGame();
+};
+$('resumeBtn').onclick=()=>{S=load(); if(S){S.history=S.history||[]; showGame();}};
+if(load()) $('resumeBtn').hidden=false;
+
+function showGame(){$('setup').hidden=true;$('game').hidden=false;pending=null;lastMove=null;render();}
+function showSetup(){$('game').hidden=true;$('setup').hidden=false;$('resumeBtn').hidden=!load();}
+
+// Actions
+function snapshot(){S.history.push(S.groups.map(g=>g.flags)); if(S.history.length>300)S.history.shift();}
+function transfer(from,to){
+  if(from===to||S.groups[from].flags<1)return;
+  snapshot(); S.groups[from].flags--; S.groups[to].flags++;
+  lastMove={from,to}; pending=null; save(); render();
+}
+function adjust(i,d){
+  if(S.groups[i].flags+d<0)return;
+  snapshot(); S.groups[i].flags+=d; lastMove=d>0?{to:i}:{from:i}; save(); render();
+}
+function undo(){
+  const h=S.history.pop(); if(!h)return;
+  h.forEach((v,i)=>{if(S.groups[i])S.groups[i].flags=v});
+  pending=null; lastMove=null; save(); render();
+}
+function rename(i){
+  const n=prompt('Group name:',S.groups[i].name);
+  if(n&&n.trim()){S.groups[i].name=n.trim().slice(0,30);save();render();}
+}
+
+$('undoBtn').onclick=undo;
+$('newBtn').onclick=()=>{if(confirm('End this game and start a new one?'))showSetup();};
+document.addEventListener('keydown',e=>{
+  if($('game').hidden)return;
+  if(e.key==='Escape'&&pending!==null){pending=null;render();}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+});
+
+$('grid').onclick=e=>{
+  const card=e.target.closest('.card'); if(!card)return;
+  const i=+card.dataset.i, act=e.target.closest('[data-act]')?.dataset.act;
+  if(pending!==null){
+    if(i!==pending&&S.groups[i].flags>0)transfer(i,pending);
+    return;
+  }
+  if(act==='correct'){
+    if(!S.groups.some((g,j)=>j!==i&&g.flags>0)){alert('No other group has a flag to take.');return;}
+    pending=i; render();
+  }
+  else if(act==='plus')adjust(i,1);
+  else if(act==='minus')adjust(i,-1);
+  else if(act==='name')rename(i);
+};
+
+function flagSvg(c){return `<svg viewBox="0 0 24 28"><rect x="3" y="2" width="2.2" height="25" rx="1" fill="#555"/><path d="M5 3h15l-4 5 4 5H5z" fill="${c}"/></svg>`;}
+
+function render(){
+  const b=$('banner');
+  if(pending!==null){
+    b.className='steal';
+    b.innerHTML=`<span>✅ <b>${esc(S.groups[pending].name)}</b> got it! Tap the group to take a flag from.</span><button id="cancelBtn">Cancel</button>`;
+    $('cancelBtn').onclick=()=>{pending=null;render();};
+  }else{
+    b.className='';
+    b.innerHTML=`<span>Tap <b>✓ Correct</b> on the group that answered right.</span>`;
+  }
+  $('undoBtn').disabled=!S.history.length;
+
+  $('grid').innerHTML=S.groups.map((g,i)=>{
+    const c=COLORS[i%COLORS.length];
+    const cls=['card'];
+    if(g.flags===0)cls.push('out');
+    if(pending===i)cls.push('winner');
+    else if(pending!==null){cls.push('target'); if(g.flags===0)cls.push('empty');}
+    if(lastMove&&lastMove.to===i)cls.push('gain');
+    if(lastMove&&lastMove.from===i)cls.push('lose');
+    const shown=Math.min(g.flags,40);
+    return `<div class="${cls.join(' ')}" data-i="${i}">
+      <div class="bar" style="background:${c}"></div>
+      <div class="body">
+        <button class="name" data-act="name" title="Click to rename">${esc(g.name)}</button>
+        <div class="count">${g.flags}<small>flag${g.flags===1?'':'s'}</small></div>
+        <div class="flags">${flagSvg(c).repeat(shown)}${g.flags>40?' …':''}</div>
+        <div class="row">
+          <button class="adj" data-act="minus" title="Remove a flag" ${g.flags===0?'disabled':''}>−</button>
+          <button class="correct" data-act="correct">✓ Correct</button>
+          <button class="adj" data-act="plus" title="Add a flag">+</button>
+        </div>
+        <div class="takehint">${g.flags===0?'No flags':'Take a flag 🚩'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  lastMove=null;
+}
+</script>
+</body>
+</html>

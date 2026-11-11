@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race Track</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#ddd6c8;--accent:#1d7bd8;--soft:#eee8dc;--good:#2a9d4a;--warn:#f4a300;--bad:#d64545;--sh:0 4px 14px rgba(0,0,0,.07)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;color:inherit;background:none}
+button:disabled{opacity:.35;cursor:not-allowed}
+[hidden]{display:none!important}
+#setup{max-width:520px;margin:6vh auto;padding:32px;background:var(--card);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+#setup h1{margin:0 0 4px;font-size:2.2rem}
+#setup>p{margin:0 0 20px;color:var(--muted)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;font-size:1.15rem;font-weight:600}
+.field.col{display:block}
+.stepper{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.stepper button{width:44px;height:44px;font-size:1.5rem;background:var(--soft)}
+.stepper input{width:70px;height:44px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid var(--line);border-radius:10px;font-family:inherit}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.seg button{padding:9px 12px;font-size:.98rem;font-weight:600}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.big{width:100%;padding:16px;margin-top:18px;font-size:1.25rem;font-weight:700;background:var(--accent);color:#fff}
+.ghost{width:100%;padding:12px;margin-top:10px;font-size:1rem;background:var(--soft)}
+.how{margin-top:18px;color:var(--muted);font-size:.98rem;line-height:1.45}
+.how summary{cursor:pointer;font-weight:600;color:var(--ink)}
+#game{padding:16px 20px 30px}
+#game>header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#game>header h1{margin:0;font-size:1.6rem;margin-right:auto}
+#game>header button,.btn{padding:10px 16px;font-weight:600;background:#fff;border:2px solid var(--line);border-radius:10px}
+#banner{padding:12px 18px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:1.2rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:58px}
+#banner .msg{margin-right:auto}
+#banner.pick{background:#fff7d6;border-color:var(--warn)}
+#banner.win{background:#e3f6e8;border-color:var(--good)}
+#banner.alert{background:#fde8e8;border-color:var(--bad)}
+#banner button{padding:8px 14px;background:#fff;border:2px solid var(--line);font-weight:600}
+.tname{padding:0;font-weight:700;text-align:left}
+.tname:hover{text-decoration:underline dotted}
+.tlabel{white-space:nowrap}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--c);vertical-align:-.05em;margin-right:.35em}
+.ok{background:var(--good);color:#fff;font-weight:700}
+.no{background:var(--bad);color:#fff;font-weight:700}
+.adj{background:var(--soft);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+.teamlist{display:flex;flex-direction:column;gap:10px}
+.trow{background:#fff;border-radius:14px;padding:12px 14px;border:3px solid transparent;border-left:10px solid var(--c);box-shadow:var(--sh);display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.trow .thead .tname{font-size:1.2rem}
+.trow .score{font-size:2rem;font-weight:800;line-height:1}
+.trow .sub{grid-column:1/-1;color:var(--muted);font-size:.95rem}
+.trow .tbtns{grid-column:1/-1;display:flex;gap:6px;margin-top:4px}
+.trow .tbtns .ok{flex:1;padding:12px}
+.trow.active{border-color:var(--good);border-left-color:var(--c)}
+.trow.lead .score::before{content:"👑 ";font-size:1.1rem}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pop{animation:pop .45s ease}.shake{animation:shake .35s ease}
+.lanes{display:flex;flex-direction:column;gap:10px}
+.lane{display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:10px 12px;border-left:10px solid var(--c);box-shadow:var(--sh)}
+.lname{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lname .tname{font-size:1.15rem}
+.lpos{color:var(--muted);font-weight:600;font-size:.95rem}
+.track{display:grid;gap:3px;overflow-x:auto}
+.sq{height:46px;border-radius:6px;background:#f3efe6;display:flex;align-items:center;justify-content:center;font-size:.9rem;min-width:0}
+.sq.start{background:#e4ded1}
+.sq.fin{background:repeating-conic-gradient(#222 0 25%,#fff 0 50%) 0 0/12px 12px}
+.sq.hz{background:#fff3c4}
+.car{display:block;width:100%;max-width:40px;position:relative;z-index:1}
+.car svg{width:100%;height:auto;display:block}
+.sq.fin .car{background:#fff;border-radius:4px;padding:2px}
+.lbtns{display:flex;gap:6px}
+.lbtns button{padding:10px 12px;min-width:46px}
+@media (max-width:860px){.lane{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div id="setup">
+  <h1 class="gtitle"></h1>
+  <p id="tagline"></p>
+  <div id="fields"></div>
+  <button class="big" id="startBtn">Start game</button>
+  <button class="ghost" id="resumeBtn" hidden>Resume saved game</button>
+  <details class="how" id="how"></details>
+</div>
+<div id="game" hidden>
+  <header><h1 class="gtitle"></h1><button id="undoBtn">↶ Undo</button><button id="newBtn">New game</button></header>
+  <div id="banner"></div>
+  <div id="board"></div>
+</div>
+<script>
+const GAME={
+key:'race',title:'Race Track',emoji:'🏁',
+tagline:'Right answers drive your car to the finish line.',
+how:`<p>Tap <b>+1</b> for a correct answer, or <b>+2</b> / <b>+3</b> for harder problems. <b>−1</b> moves a car back.</p><p>With hazards on, a car that lands on ⚠️ has to answer a bonus question. Right means it stays put. Wrong sends it back 2.</p>`,
+options:[
+  {id:'teams',label:'Teams',min:2,max:8,def:4},
+  {id:'len',label:'Track length',min:10,max:40,def:20},
+  {id:'hz',label:'Hazards',type:'seg',def:'1',choices:[['1','On'],['0','Off']]}
+],
+init(o){
+  const len=o.len,hz=[];
+  if(o.hz==='1'){const want=Math.max(2,Math.round(len/6)),pool=[];for(let k=2;k<len-1;k++)pool.push(k);
+    while(hz.length<want&&pool.length){const k=pool.splice(Math.floor(Math.random()*pool.length),1)[0];if(!hz.some(h=>Math.abs(h-k)<2))hz.push(k);}}
+  return{len,pos:S.teams.map(()=>0),hazards:hz,finish:[],hz:null};
+},
+render(){
+  const medals=['🥇','🥈','🥉'],lock=S.hz!=null;
+  if(lock)banner(`⚠️ ${tb(S.hz)} hit a hazard! Bonus question: right = stay, wrong = back 2.`,'alert','<button data-act="hzok">✓ Got it</button><button data-act="hzmiss">✗ Missed (back 2)</button>');
+  else if(S.finish.length)banner(`🏁 ${tb(S.finish[0])} crossed the finish line first!`,'win');
+  else banner('Tap <b>+1</b> for a correct answer, or <b>+2</b> / <b>+3</b> for harder problems.');
+  const lanes=S.teams.map((_,i)=>{
+    const place=S.finish.indexOf(i);let cells='';
+    for(let k=0;k<=S.len;k++){const cls=k===0?'start':k===S.len?'fin':S.hazards.includes(k)?'hz':'';
+      cells+=`<div class="sq ${cls}">${S.pos[i]===k?`<span class="car ${FX.car===i?'pop':''}">${carSvg(tc(i))}</span>`:(cls==='hz'?'⚠️':'')}</div>`;}
+    const d=lock?'disabled':'';
+    return `<div class="lane" style="--c:${tc(i)}"><div class="lname">${tn(i)}<span class="lpos">${place>=0?(medals[place]||'🏁')+' Finished #'+(place+1):S.pos[i]+' / '+S.len}</span></div>
+      <div class="track" style="grid-template-columns:repeat(${S.len+1},minmax(26px,1fr))">${cells}</div>
+      <div class="lbtns"><button class="adj" data-act="mv" data-i="${i}" data-d="-1" ${d}>−1</button><button class="ok" data-act="mv" data-i="${i}" data-d="1" ${d}>+1</button><button class="adj" data-act="mv" data-i="${i}" data-d="2" ${d}>+2</button><button class="adj" data-act="mv" data-i="${i}" data-d="3" ${d}>+3</button></div></div>`;
+  }).join('');
+  $('board').innerHTML=`<div class="lanes">${lanes}</div>`;
+},
+click(a,el){
+  if(a==='mv'){if(S.hz!=null)return;raceMove(+el.dataset.i,+el.dataset.d,true);}
+  else if(a==='hzok')act(()=>{S.hz=null;});
+  else if(a==='hzmiss'){const i=S.hz;if(i==null)return;act(()=>{S.hz=null;raceSet(i,S.pos[i]-2);});}
+}};
+function raceSet(i,p){p=Math.max(0,Math.min(S.len,p));S.pos[i]=p;FX.car=i;
+  if(p>=S.len){if(!S.finish.includes(i))S.finish.push(i);}else S.finish=S.finish.filter(x=>x!==i);}
+function raceMove(i,d){
+  const p=Math.max(0,Math.min(S.len,S.pos[i]+d));if(p===S.pos[i])return;
+  act(()=>{raceSet(i,p);if(d>0&&p<S.len&&S.hazards.includes(p))S.hz=i;});
+}
+function carSvg(c){return `<svg viewBox="0 0 40 24"><path d="M3 17 L7 10 Q9 6 14 6 H24 Q28 6 31 10 L36 12 Q39 13 39 17 V19 H1 V17Z" fill="${c}"/><rect x="15" y="8" width="9" height="5" rx="1.5" fill="#d7ecff"/><circle cx="10" cy="19" r="4" fill="#222"/><circle cx="30" cy="19" r="4" fill="#222"/></svg>`}
+
+// ===== Shared engine =====
+const COLORS=['#e63946','#1d7bd8','#2a9d4a','#f4a300','#8e44ad','#e76f51','#0fa3b1','#d63384','#5a3e2b','#3a86ff','#80b918','#6c757d'];
+const MARKS=['✕','◯','▲','■'];
+const $=id=>document.getElementById(id);
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.round(Number(v)||lo)));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='classgame-'+GAME.key+'-v1';
+const cancelBtn='<button data-act="cancel">Cancel</button>';
+const nextBtn='<button data-act="next">Next round ▶</button>';
+let S=null,H=[],UI={},FX={};
+const OPTS={};
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,H}))}catch(e){try{localStorage.setItem(KEY,JSON.stringify({S,H:H.slice(-15)}))}catch(e2){}}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.S&&Array.isArray(d.S.teams)&&d.S.teams.length)return d}catch(e){}return null}
+// Every scoring change goes through act(): it snapshots the state first so Undo can restore it.
+function act(fn,keepUI){const before=JSON.stringify(S);if(fn()===false)return;H.push(before);if(H.length>200)H.shift();if(!keepUI)UI={};save();draw();}
+function undo(){
+  if(!H.length)return;
+  const names=S.teams.map(t=>t.name),kept={};(GAME.keep||[]).forEach(k=>kept[k]=S[k]);
+  S=JSON.parse(H.pop());
+  S.teams.forEach((t,i)=>{if(names[i]!=null)t.name=names[i]});           // renames survive undo
+  (GAME.keep||[]).forEach(k=>{if(kept[k]!==undefined)S[k]=kept[k]});
+  UI={};FX={};save();draw();
+}
+function ui(o){UI=o||{};draw();}
+function draw(){$('undoBtn').disabled=!H.length;GAME.render();FX={};}
+function banner(msg,cls,btns){const b=$('banner');b.className=cls||'';b.innerHTML='<span class="msg">'+msg+'</span>'+(btns||'');}
+function tc(i){return COLORS[i%COLORS.length]}
+function tn(i){return `<button class="tname" data-rename="${i}" title="Click to rename" style="--c:${tc(i)}"><span class="dot"></span>${esc(S.teams[i].name)}</button>`}
+function tb(i){return `<b class="tlabel" style="--c:${tc(i)}"><span class="dot"></span>${esc(S.teams[i].name)}</b>`}
+function leaders(arr){const m=Math.max(...arr),tied=arr.every(v=>v===m);return arr.map(v=>m>0&&v===m&&!tied)}
+function winnerText(arr){const m=Math.max(...arr);const w=arr.map((v,i)=>v===m?i:-1).filter(i=>i>=0);return w.length===1?`${tb(w[0])} wins! 🎉`:`It's a tie: ${w.map(tb).join(' & ')}!`}
+
+// ----- Setup screen -----
+function buildSetup(){
+  const f=$('fields');f.innerHTML='';
+  GAME.options.forEach(o=>{
+    const row=document.createElement('div');row.className='field';
+    if(o.type==='seg'){OPTS[o.id]=o.def;row.innerHTML=`<span>${o.label}</span><div class="seg">${o.choices.map(c=>`<button data-opt="${o.id}" data-val="${c[0]}" class="${c[0]===o.def?'on':''}">${c[1]}</button>`).join('')}</div>`;}
+    else if(o.type==='html'){row.className='field col';row.innerHTML=o.html;}
+    else row.innerHTML=`<span>${o.label}</span><div class="stepper"><button data-step="${o.id}" data-d="-1">−</button><input id="opt_${o.id}" type="number" min="${o.min}" max="${o.max}" value="${o.def}"><button data-step="${o.id}" data-d="1">+</button></div>`;
+    f.appendChild(row);
+  });
+}
+function readOpts(){const o={};GAME.options.forEach(x=>{if(x.type==='seg')o[x.id]=OPTS[x.id];else if(x.type!=='html')o[x.id]=clamp($('opt_'+x.id).value,x.min,x.max);});return o;}
+$('setup').addEventListener('click',e=>{
+  const st=e.target.closest('[data-step]');
+  if(st){const o=GAME.options.find(x=>x.id===st.dataset.step),inp=$('opt_'+o.id);inp.value=clamp(+inp.value+ +st.dataset.d,o.min,o.max);return;}
+  const sg=e.target.closest('[data-opt]');
+  if(sg){OPTS[sg.dataset.opt]=sg.dataset.val;sg.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===sg));}
+});
+$('startBtn').onclick=async()=>{
+  const o=readOpts();
+  if(GAME.beforeStart&&!(await GAME.beforeStart(o)))return;
+  const n=o.teams||GAME.fixedTeams||2;
+  S={teams:Array.from({length:n},(_,i)=>({name:'Team '+(i+1)})),o};
+  Object.assign(S,GAME.init(o));
+  H=[];UI={};FX={};save();showGame();
+};
+$('resumeBtn').onclick=()=>{const d=load();if(!d)return;S=d.S;H=Array.isArray(d.H)?d.H:[];UI={};FX={};if(GAME.onResume)GAME.onResume();showGame();};
+function showGame(){$('setup').hidden=true;$('game').hidden=false;window.scrollTo(0,0);draw();}
+function showSetup(){$('game').hidden=true;$('setup').hidden=false;$('resumeBtn').hidden=!load();}
+
+// ----- Game screen -----
+$('undoBtn').onclick=undo;
+$('newBtn').onclick=()=>{if(confirm('End this game and go back to setup?'))showSetup();};
+document.addEventListener('keydown',e=>{
+  if($('game').hidden)return;
+  if(e.key==='Escape'&&Object.keys(UI).length)ui({});
+  if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+});
+$('game').addEventListener('click',e=>{
+  const r=e.target.closest('[data-rename]');
+  if(r&&!Object.keys(UI).length){
+    const i=+r.dataset.rename,n=prompt('Team name:',S.teams[i].name);
+    if(n&&n.trim()){S.teams[i].name=n.trim().slice(0,30);save();draw();}
+    return;
+  }
+  const a=e.target.closest('[data-act]');
+  if(!a||a.disabled)return;
+  if(a.dataset.act==='cancel'){ui({});return;}
+  GAME.click(a.dataset.act,a,e);
+});
+
+document.title=GAME.title;
+document.querySelectorAll('.gtitle').forEach(h=>h.textContent=GAME.emoji+' '+GAME.title);
+$('tagline').textContent=GAME.tagline;
+$('how').innerHTML='<summary>How to play</summary>'+GAME.how;
+buildSetup();
+if(GAME.setupInit)GAME.setupInit();
+if(load())$('resumeBtn').hidden=false;
+
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classroom Games</title>
+<style>
+  :root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:1000px;margin:0 auto;padding:40px 20px}
+  h1{margin:0 0 6px;font-size:2.4rem}
+  .lede{margin:0 0 28px;color:var(--muted);font-size:1.1rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  a.card{display:flex;gap:14px;align-items:flex-start;background:var(--card);border-radius:16px;padding:18px;text-decoration:none;color:inherit;box-shadow:0 4px 14px rgba(0,0,0,.07);border-top:8px solid var(--c);transition:transform .15s}
+  a.card:hover{transform:translateY(-3px)}
+  .em{font-size:2.2rem;line-height:1}
+  .card b{display:block;font-size:1.2rem;margin-bottom:4px}
+  .card span{color:var(--muted);line-height:1.4}
+</style>
+</head>
+<body>
+<main>
+  <h1>🎲 Classroom Games</h1>
+  <p class="lede">Students work on the worksheet. You run the scoreboard. Every game has undo, saves as you go, and lets you rename teams by clicking their names.</p>
+  <div class="grid">
+    <a class="card" href="capture-the-flag.html" style="--c:#e63946"><div class="em">🚩</div><div><b>Capture the Flag</b><span>Right answer? Take a flag from another group.</span></div></a>
+    <a class="card" href="grudge-ball.html" style="--c:#d64545"><div class="em">❌</div><div><b>Grudge Ball</b><span>Erase X's from other teams. Nobody is ever out.</span></div></a>
+    <a class="card" href="tic-tac-toe-takeover.html" style="--c:#1d7bd8"><div class="em">⭕</div><div><b>Tic-Tac-Toe Takeover</b><span>Claim or steal squares. Lines earn bonus points.</span></div></a>
+    <a class="card" href="connect-four.html" style="--c:#2459c9"><div class="em">🔴</div><div><b>Connect Four</b><span>Drop a chip for each right answer. Four in a row wins the round.</span></div></a>
+    <a class="card" href="tug-of-war.html" style="--c:#a87b3f"><div class="em">🪢</div><div><b>Tug of War</b><span>Two teams pull the rope with every right answer.</span></div></a>
+    <a class="card" href="race-track.html" style="--c:#2a9d4a"><div class="em">🏁</div><div><b>Race Track</b><span>Drive to the finish. Watch out for hazard squares.</span></div></a>
+    <a class="card" href="battleship.html" style="--c:#0fa3b1"><div class="em">🚢</div><div><b>Battleship</b><span>Right answers earn a shot at another team's hidden fleet.</span></div></a>
+    <a class="card" href="jeopardy-board.html" style="--c:#1e3a8a"><div class="em">💰</div><div><b>Jeopardy Board</b><span>Categories and values on the screen, problems on the worksheet.</span></div></a>
+    <a class="card" href="bank-it-or-risk-it.html" style="--c:#f4a300"><div class="em">🏦</div><div><b>Bank It or Risk It</b><span>Grow your pot, then bank it before a miss wipes it out.</span></div></a>
+    <a class="card" href="mystery-picture.html" style="--c:#8e44ad"><div class="em">🖼️</div><div><b>Mystery Picture</b><span>Right answers reveal tiles of a hidden picture.</span></div></a>
+    <a class="card" href="risk.html" style="--c:#5a3e2b"><div class="em">🗺️</div><div><b>RISK</b><span>Conquer territories on a new map every game.</span></div></a>
+  </div>
+</main>
+</body>
+</html>

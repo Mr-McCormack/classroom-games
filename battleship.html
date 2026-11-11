@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battleship</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#ddd6c8;--accent:#1d7bd8;--soft:#eee8dc;--good:#2a9d4a;--warn:#f4a300;--bad:#d64545;--sh:0 4px 14px rgba(0,0,0,.07)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;color:inherit;background:none}
+button:disabled{opacity:.35;cursor:not-allowed}
+[hidden]{display:none!important}
+#setup{max-width:520px;margin:6vh auto;padding:32px;background:var(--card);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+#setup h1{margin:0 0 4px;font-size:2.2rem}
+#setup>p{margin:0 0 20px;color:var(--muted)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;font-size:1.15rem;font-weight:600}
+.field.col{display:block}
+.stepper{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.stepper button{width:44px;height:44px;font-size:1.5rem;background:var(--soft)}
+.stepper input{width:70px;height:44px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid var(--line);border-radius:10px;font-family:inherit}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.seg button{padding:9px 12px;font-size:.98rem;font-weight:600}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.big{width:100%;padding:16px;margin-top:18px;font-size:1.25rem;font-weight:700;background:var(--accent);color:#fff}
+.ghost{width:100%;padding:12px;margin-top:10px;font-size:1rem;background:var(--soft)}
+.how{margin-top:18px;color:var(--muted);font-size:.98rem;line-height:1.45}
+.how summary{cursor:pointer;font-weight:600;color:var(--ink)}
+#game{padding:16px 20px 30px}
+#game>header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#game>header h1{margin:0;font-size:1.6rem;margin-right:auto}
+#game>header button,.btn{padding:10px 16px;font-weight:600;background:#fff;border:2px solid var(--line);border-radius:10px}
+#banner{padding:12px 18px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:1.2rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:58px}
+#banner .msg{margin-right:auto}
+#banner.pick{background:#fff7d6;border-color:var(--warn)}
+#banner.win{background:#e3f6e8;border-color:var(--good)}
+#banner.alert{background:#fde8e8;border-color:var(--bad)}
+#banner button{padding:8px 14px;background:#fff;border:2px solid var(--line);font-weight:600}
+.tname{padding:0;font-weight:700;text-align:left}
+.tname:hover{text-decoration:underline dotted}
+.tlabel{white-space:nowrap}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--c);vertical-align:-.05em;margin-right:.35em}
+.ok{background:var(--good);color:#fff;font-weight:700}
+.no{background:var(--bad);color:#fff;font-weight:700}
+.adj{background:var(--soft);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+.teamlist{display:flex;flex-direction:column;gap:10px}
+.trow{background:#fff;border-radius:14px;padding:12px 14px;border:3px solid transparent;border-left:10px solid var(--c);box-shadow:var(--sh);display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.trow .thead .tname{font-size:1.2rem}
+.trow .score{font-size:2rem;font-weight:800;line-height:1}
+.trow .sub{grid-column:1/-1;color:var(--muted);font-size:.95rem}
+.trow .tbtns{grid-column:1/-1;display:flex;gap:6px;margin-top:4px}
+.trow .tbtns .ok{flex:1;padding:12px}
+.trow.active{border-color:var(--good);border-left-color:var(--c)}
+.trow.lead .score::before{content:"👑 ";font-size:1.1rem}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pop{animation:pop .45s ease}.shake{animation:shake .35s ease}
+.bboards{display:flex;flex-wrap:wrap;gap:18px;justify-content:center}
+.bboard{background:#fff;border-radius:16px;padding:14px;border:4px solid transparent;border-top:12px solid var(--c);box-shadow:var(--sh);width:min(100%,400px);display:flex;flex-direction:column;gap:10px}
+.bboard.active{border-color:var(--good);border-top-color:var(--c)}
+.bboard.out{opacity:.65}
+.bhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bhead .tname{font-size:1.2rem}
+.afloat{color:var(--muted);font-weight:600;font-size:.95rem}
+.bgrid{display:grid;gap:3px}
+.lbl{font-size:.8rem;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.bc{aspect-ratio:1;border-radius:5px;background:#d7e9f7;font-size:1.1rem;padding:0;cursor:default;display:flex;align-items:center;justify-content:center}
+.bc.can{cursor:pointer;outline:2px dashed var(--warn);outline-offset:-2px}
+.bc.can:hover{background:#ffe8a3}
+.bc.miss{background:#eef4f9;color:#6b7c8c;font-size:1.6rem}
+.bc.ship{background:#8d99a6}
+.bc.hit{background:#ffd6cc}
+.bc.sunk{background:#5c6670}
+.bboard .ok{padding:12px}
+
+</style>
+</head>
+<body>
+<div id="setup">
+  <h1 class="gtitle"></h1>
+  <p id="tagline"></p>
+  <div id="fields"></div>
+  <button class="big" id="startBtn">Start game</button>
+  <button class="ghost" id="resumeBtn" hidden>Resume saved game</button>
+  <details class="how" id="how"></details>
+</div>
+<div id="game" hidden>
+  <header><h1 class="gtitle"></h1><button id="undoBtn">↶ Undo</button><button id="newBtn">New game</button></header>
+  <div id="banner"></div>
+  <div id="board"></div>
+</div>
+<script>
+const GAME={
+key:'battleship',title:'Battleship',emoji:'🚢',
+tagline:"Right answers earn a shot at another team's fleet.",
+how:`<p>Each team gets a hidden fleet, placed at random. Tap <b>✓ Correct</b> for the team that answered right, then tap a square on another team's board to fire. 💥 is a hit and • is a miss. Students can call shots by grid name, like "B4".</p><p>The last team with a ship afloat wins. Teams whose fleet is sunk can still answer and fire, so everyone stays in it.</p>`,
+options:[
+  {id:'teams',label:'Teams',min:2,max:4,def:2},
+  {id:'size',label:'Board',type:'seg',def:'6',choices:[['6','6×6 · 3 ships'],['8','8×8 · 4 ships']]}
+],
+init(o){const N=+o.size,sizes=N===6?[3,2,2]:[4,3,3,2];return{N,b:S.teams.map(()=>({ships:bsPlace(N,sizes),shots:Array(N*N).fill(0)})),last:null,reveal:false}},
+render(){
+  const t=UI.team,picking=t!=null,N=S.N,letters='ABCDEFGH';
+  const af=S.teams.map((_,i)=>bsAfloat(i)),nAlive=af.filter(x=>x>0).length;
+  if(picking)banner(`✅ ${tb(t)} got it! Tap a square on another team's board to fire.`,'pick',cancelBtn);
+  else if(nAlive<=1){const w=af.findIndex(x=>x>0);banner(w>=0?`🏆 ${tb(w)} has the last fleet afloat!`:'Every fleet is sunk!','win',`<button data-act="reveal">${S.reveal?'Hide':'Show'} all ships</button>`);}
+  else if(S.last){const L=S.last;banner(L.r==='miss'?`💦 ${tb(L.s)} missed ${tb(L.t)} at ${L.c}.`:L.r==='hit'?`💥 ${tb(L.s)} hit ${tb(L.t)} at ${L.c}!`:`🔥 ${tb(L.s)} sank ${tb(L.t)}'s ${L.z}-square ship!`,L.r==='miss'?'':'alert');}
+  else banner('Tap <b>✓ Correct</b> on the team that answered right.');
+  const boards=S.teams.map((_,i)=>{
+    const b=S.b[i],target=picking&&i!==t&&af[i]>0;
+    let g='<div class="lbl"></div>';for(let c=0;c<N;c++)g+=`<div class="lbl">${c+1}</div>`;
+    for(let r=0;r<N;r++){g+=`<div class="lbl">${letters[r]}</div>`;
+      for(let c=0;c<N;c++){const k=r*N+c,sh=b.shots[k],si=bsShipAt(i,k),sunk=si>=0&&b.ships[si].every(x=>b.shots[x]===2),show=si>=0&&(sunk||S.reveal);
+        const cls=['bc',sh===1?'miss':'',sh===2?'hit':'',show?'ship':'',sunk?'sunk':'',target&&sh===0?'can':'',FX.k===i+':'+k?'pop':''].join(' ');
+        g+=`<button class="${cls}" data-act="fire" data-i="${i}" data-k="${k}">${sh===2?'💥':sh===1?'•':''}</button>`;}}
+    return `<div class="bboard ${t===i?'active':''} ${af[i]===0?'out':''}" style="--c:${tc(i)}"><div class="bhead">${tn(i)}<span class="afloat">${af[i]===0?'🏴 Fleet sunk':`🚢 ${af[i]} of ${b.ships.length} afloat`}</span></div><div class="bgrid" style="grid-template-columns:22px repeat(${N},1fr)">${g}</div><button class="ok" data-act="correct" data-i="${i}">✓ Correct</button></div>`;
+  }).join('');
+  $('board').innerHTML=`<div class="bboards">${boards}</div>`;
+},
+click(a,el){
+  if(a==='correct'){
+    const i=+el.dataset.i;
+    if(!S.b.some((b,j)=>j!==i&&bsAfloat(j)>0)){alert('There are no fleets left to fire at.');return;}
+    ui({team:i});
+  }else if(a==='fire'){
+    const t=UI.team;if(t==null)return;
+    const i=+el.dataset.i,k=+el.dataset.k;
+    if(i===t||S.b[i].shots[k]!==0||bsAfloat(i)===0)return;
+    act(()=>{const b=S.b[i],si=bsShipAt(i,k),c='ABCDEFGH'[Math.floor(k/S.N)]+(k%S.N+1);FX.k=i+':'+k;
+      if(si<0){b.shots[k]=1;S.last={s:t,t:i,r:'miss',c};}
+      else{b.shots[k]=2;const sunk=b.ships[si].every(x=>b.shots[x]===2);S.last={s:t,t:i,r:sunk?'sunk':'hit',c,z:b.ships[si].length};}});
+  }else if(a==='reveal'){S.reveal=!S.reveal;save();draw();}
+}};
+function bsAfloat(i){const b=S.b[i];return b.ships.filter(s=>s.some(k=>b.shots[k]!==2)).length}
+function bsShipAt(i,k){return S.b[i].ships.findIndex(s=>s.includes(k))}
+function bsPlace(N,sizes){
+  for(let tries=0;tries<500;tries++){
+    const used=new Set(),ships=[];let ok=true;
+    for(const L of sizes){let placed=false;
+      for(let t=0;t<200&&!placed;t++){const h=Math.random()<.5,r=Math.floor(Math.random()*(h?N:N-L+1)),c=Math.floor(Math.random()*(h?N-L+1:N)),cells=[];
+        for(let k=0;k<L;k++)cells.push(h?r*N+c+k:(r+k)*N+c);
+        if(cells.every(x=>!used.has(x))){cells.forEach(x=>used.add(x));ships.push(cells);placed=true;}}
+      if(!placed){ok=false;break;}}
+    if(ok)return ships;
+  }
+  return [];
+}
+
+// ===== Shared engine =====
+const COLORS=['#e63946','#1d7bd8','#2a9d4a','#f4a300','#8e44ad','#e76f51','#0fa3b1','#d63384','#5a3e2b','#3a86ff','#80b918','#6c757d'];
+const MARKS=['✕','◯','▲','■'];
+const $=id=>document.getElementById(id);
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.round(Number(v)||lo)));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='classgame-'+GAME.key+'-v1';
+const cancelBtn='<button data-act="cancel">Cancel</button>';
+const nextBtn='<button data-act="next">Next round ▶</button>';
+let S=null,H=[],UI={},FX={};
+const OPTS={};
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,H}))}catch(e){try{localStorage.setItem(KEY,JSON.stringify({S,H:H.slice(-15)}))}catch(e2){}}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.S&&Array.isArray(d.S.teams)&&d.S.teams.length)return d}catch(e){}return null}
+// Every scoring change goes through act(): it snapshots the state first so Undo can restore it.
+function act(fn,keepUI){const before=JSON.stringify(S);if(fn()===false)return;H.push(before);if(H.length>200)H.shift();if(!keepUI)UI={};save();draw();}
+function undo(){
+  if(!H.length)return;
+  const names=S.teams.map(t=>t.name),kept={};(GAME.keep||[]).forEach(k=>kept[k]=S[k]);
+  S=JSON.parse(H.pop());
+  S.teams.forEach((t,i)=>{if(names[i]!=null)t.name=names[i]});           // renames survive undo
+  (GAME.keep||[]).forEach(k=>{if(kept[k]!==undefined)S[k]=kept[k]});
+  UI={};FX={};save();draw();
+}
+function ui(o){UI=o||{};draw();}
+function draw(){$('undoBtn').disabled=!H.length;GAME.render();FX={};}
+function banner(msg,cls,btns){const b=$('banner');b.className=cls||'';b.innerHTML='<span class="msg">'+msg+'</span>'+(btns||'');}
+function tc(i){return COLORS[i%COLORS.length]}
+function tn(i){return `<button class="tname" data-rename="${i}" title="Click to rename" style="--c:${tc(i)}"><span class="dot"></span>${esc(S.teams[i].name)}</button>`}
+function tb(i){return `<b class="tlabel" style="--c:${tc(i)}"><span class="dot"></span>${esc(S.teams[i].name)}</b>`}
+function leaders(arr){const m=Math.max(...arr),tied=arr.every(v=>v===m);return arr.map(v=>m>0&&v===m&&!tied)}
+function winnerText(arr){const m=Math.max(...arr);const w=arr.map((v,i)=>v===m?i:-1).filter(i=>i>=0);return w.length===1?`${tb(w[0])} wins! 🎉`:`It's a tie: ${w.map(tb).join(' & ')}!`}
+
+// ----- Setup screen -----
+function buildSetup(){
+  const f=$('fields');f.innerHTML='';
+  GAME.options.forEach(o=>{
+    const row=document.createElement('div');row.className='field';
+    if(o.type==='seg'){OPTS[o.id]=o.def;row.innerHTML=`<span>${o.label}</span><div class="seg">${o.choices.map(c=>`<button data-opt="${o.id}" data-val="${c[0]}" class="${c[0]===o.def?'on':''}">${c[1]}</button>`).join('')}</div>`;}
+    else if(o.type==='html'){row.className='field col';row.innerHTML=o.html;}
+    else row.innerHTML=`<span>${o.label}</span><div class="stepper"><button data-step="${o.id}" data-d="-1">−</button><input id="opt_${o.id}" type="number" min="${o.min}" max="${o.max}" value="${o.def}"><button data-step="${o.id}" data-d="1">+</button></div>`;
+    f.appendChild(row);
+  });
+}
+function readOpts(){const o={};GAME.options.forEach(x=>{if(x.type==='seg')o[x.id]=OPTS[x.id];else if(x.type!=='html')o[x.id]=clamp($('opt_'+x.id).value,x.min,x.max);});return o;}
+$('setup').addEventListener('click',e=>{
+  const st=e.target.closest('[data-step]');
+  if(st){const o=GAME.options.find(x=>x.id===st.dataset.step),inp=$('opt_'+o.id);inp.value=clamp(+inp.value+ +st.dataset.d,o.min,o.max);return;}
+  const sg=e.target.closest('[data-opt]');
+  if(sg){OPTS[sg.dataset.opt]=sg.dataset.val;sg.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===sg));}
+});
+$('startBtn').onclick=async()=>{
+  const o=readOpts();
+  if(GAME.beforeStart&&!(await GAME.beforeStart(o)))return;
+  const n=o.teams||GAME.fixedTeams||2;
+  S={teams:Array.from({length:n},(_,i)=>({name:'Team '+(i+1)})),o};
+  Object.assign(S,GAME.init(o));
+  H=[];UI={};FX={};save();showGame();
+};
+$('resumeBtn').onclick=()=>{const d=load();if(!d)return;S=d.S;H=Array.isArray(d.H)?d.H:[];UI={};FX={};if(GAME.onResume)GAME.onResume();showGame();};
+function showGame(){$('setup').hidden=true;$('game').hidden=false;window.scrollTo(0,0);draw();}
+function showSetup(){$('game').hidden=true;$('setup').hidden=false;$('resumeBtn').hidden=!load();}
+
+// ----- Game screen -----
+$('undoBtn').onclick=undo;
+$('newBtn').onclick=()=>{if(confirm('End this game and go back to setup?'))showSetup();};
+document.addEventListener('keydown',e=>{
+  if($('game').hidden)return;
+  if(e.key==='Escape'&&Object.keys(UI).length)ui({});
+  if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+});
+$('game').addEventListener('click',e=>{
+  const r=e.target.closest('[data-rename]');
+  if(r&&!Object.keys(UI).length){
+    const i=+r.dataset.rename,n=prompt('Team name:',S.teams[i].name);
+    if(n&&n.trim()){S.teams[i].name=n.trim().slice(0,30);save();draw();}
+    return;
+  }
+  const a=e.target.closest('[data-act]');
+  if(!a||a.disabled)return;
+  if(a.dataset.act==='cancel'){ui({});return;}
+  GAME.click(a.dataset.act,a,e);
+});
+
+document.title=GAME.title;
+document.querySelectorAll('.gtitle').forEach(h=>h.textContent=GAME.emoji+' '+GAME.title);
+$('tagline').textContent=GAME.tagline;
+$('how').innerHTML='<summary>How to play</summary>'+GAME.how;
+buildSetup();
+if(GAME.setupInit)GAME.setupInit();
+if(load())$('resumeBtn').hidden=false;
+
+</script>
+</body>
+</html>
