@@ -1,0 +1,89 @@
+rules_version = '2';
+// Security rules for BOTH Hall Pass and Classroom Games (they share one Firebase project).
+// Paste ALL of this into Firebase console → Firestore Database → Rules, replacing everything, then Publish.
+// Keep this file the same in the hall-pass and classroom-games repos.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Your classes, rosters, PINs (scrambled), schedule, settings, sign-ins, and pass log.
+    // Only you, signed in with your Google account, can read or change any of it.
+    match /teachers/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+      match /{rest=**} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // A room holds the current class name, no-pass times, and the first name + last initial
+    // of students who are out or in line. Anyone with the exact room code can view that one
+    // room. Nobody can list or search rooms, and only you can change one.
+    match /rooms/{code} {
+      function isOwner() {
+        return request.auth != null
+          && get(/databases/$(database)/documents/rooms/$(code)).data.ownerUid == request.auth.uid;
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+
+      // Students drop sealed requests here (a PIN or a sign-in token). They can't read them
+      // back, change them, or see anyone else's. Only your screen opens them.
+      match /requests/{id} {
+        allow create: if exists(/databases/$(database)/documents/rooms/$(code))
+          && request.resource.data.keys().hasOnly(['action', 'pin', 'token', 'device', 'at'])
+          && request.resource.data.action in ['login', 'join', 'leave', 'go', 'back', 'logout']
+          && request.resource.data.at == request.time
+          && request.resource.data.device is string && request.resource.data.device.size() <= 40
+          && (!('pin' in request.resource.data)
+              || (request.resource.data.pin is string && request.resource.data.pin.size() <= 8))
+          && (!('token' in request.resource.data)
+              || (request.resource.data.token is string && request.resource.data.token.size() <= 40));
+        allow read, delete: if isOwner();
+        allow update: if false;
+      }
+
+      // Your screen's answer to each request. A student's device can open only the reply to
+      // its own request (the ID is a long random string it chose), never list them.
+      match /replies/{id} {
+        allow get, delete: if true;
+        allow list, create, update: if isOwner();
+      }
+    }
+
+    // ---------- Classroom Games buzz-in (mr-mccormack.github.io/classroom-games) ----------
+    // Separate from Hall Pass: nothing here can read or change the sections above.
+    // A buzz room holds the game name, team names, and the line. Anyone with the exact code can
+    // view that one room. Nobody can list or search rooms, and only your teacher key can change one.
+    match /buzz/{code} {
+      function isBuzzOwner() {
+        return request.auth != null
+          && get(/databases/$(database)/documents/buzz/$(code)).data.ownerUid == request.auth.uid;
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+
+      // A student's computer can only drop a "join" or "leave" press here, stamped with the server's
+      // clock. Your game screen reads the presses, builds the line, and deletes them.
+      match /presses/{id} {
+        allow create: if exists(/databases/$(database)/documents/buzz/$(code))
+          && request.resource.data.keys().hasOnly(['team', 'action', 'at', 'device'])
+          && request.resource.data.team is int
+          && request.resource.data.team >= 0 && request.resource.data.team < 12
+          && request.resource.data.action in ['join', 'leave']
+          && request.resource.data.at == request.time
+          && request.resource.data.device is string && request.resource.data.device.size() <= 40;
+        allow read, delete: if isBuzzOwner();
+        allow update: if false;
+      }
+    }
+  }
+}

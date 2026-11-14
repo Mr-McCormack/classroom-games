@@ -1,0 +1,85 @@
+:root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#ddd6c8;--accent:#1d7bd8;--soft:#eee8dc;--good:#2a9d4a;--warn:#f4a300;--bad:#d64545;--sh:0 4px 14px rgba(0,0,0,.07)}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;color:inherit;background:none}
+button:disabled{opacity:.35;cursor:not-allowed}
+[hidden]{display:none!important}
+#setup{max-width:520px;margin:6vh auto;padding:32px;background:var(--card);border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+#setup h1{margin:0 0 4px;font-size:2.2rem}
+#setup>p{margin:0 0 20px;color:var(--muted)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0;font-size:1.15rem;font-weight:600}
+.field.col{display:block}
+.stepper{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.stepper button{width:44px;height:44px;font-size:1.5rem;background:var(--soft)}
+.stepper input{width:70px;height:44px;text-align:center;font-size:1.3rem;font-weight:700;border:2px solid var(--line);border-radius:10px;font-family:inherit}
+.seg{display:flex;background:var(--soft);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.seg button{padding:9px 12px;font-size:.98rem;font-weight:600}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.big{width:100%;padding:16px;margin-top:18px;font-size:1.25rem;font-weight:700;background:var(--accent);color:#fff}
+.ghost{width:100%;padding:12px;margin-top:10px;font-size:1rem;background:var(--soft)}
+.how{margin-top:18px;color:var(--muted);font-size:.98rem;line-height:1.45}
+.how summary{cursor:pointer;font-weight:600;color:var(--ink)}
+#game{padding:16px 20px 30px}
+#game>header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#game>header h1{margin:0;font-size:1.6rem;margin-right:auto}
+#game>header button,.btn{padding:10px 16px;font-weight:600;background:#fff;border:2px solid var(--line);border-radius:10px}
+#banner{padding:12px 18px;border-radius:12px;background:#fff;border:2px solid var(--line);font-size:1.2rem;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:58px}
+#banner .msg{margin-right:auto}
+#banner.pick{background:#fff7d6;border-color:var(--warn)}
+#banner.win{background:#e3f6e8;border-color:var(--good)}
+#banner.alert{background:#fde8e8;border-color:var(--bad)}
+#banner button{padding:8px 14px;background:#fff;border:2px solid var(--line);font-weight:600}
+.tname{padding:0;font-weight:700;text-align:left}
+.tname:hover{text-decoration:underline dotted}
+.tlabel{white-space:nowrap}
+.dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;background:var(--c);vertical-align:-.05em;margin-right:.35em}
+.ok{background:var(--good);color:#fff;font-weight:700}
+.no{background:var(--bad);color:#fff;font-weight:700}
+.adj{background:var(--soft);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:860px){.layout{grid-template-columns:1fr}}
+.teamlist{display:flex;flex-direction:column;gap:10px}
+.trow{background:#fff;border-radius:14px;padding:12px 14px;border:3px solid transparent;border-left:10px solid var(--c);box-shadow:var(--sh);display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.trow .thead .tname{font-size:1.2rem}
+.trow .score{font-size:2rem;font-weight:800;line-height:1}
+.trow .sub{grid-column:1/-1;color:var(--muted);font-size:.95rem}
+.trow .tbtns{grid-column:1/-1;display:flex;gap:6px;margin-top:4px}
+.trow .tbtns .ok{flex:1;padding:12px}
+.trow.active{border-color:var(--good);border-left-color:var(--c)}
+.trow.lead .score::before{content:"👑 ";font-size:1.1rem}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.1)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pop{animation:pop .45s ease}.shake{animation:shake .35s ease}
+/* ----- Buzz-in panel ----- */
+#buzz:empty{display:none}
+.bz{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:16px}
+.bz.off{background:transparent;border-style:dashed}
+.bz.alertbz{background:#fde8e8;border-color:var(--bad)}
+.bz button,.bz .btn{padding:8px 12px;font-weight:600;border:2px solid var(--line);background:#fff;border-radius:10px;font-size:.95rem}
+.bz .bzon{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bzhint{color:var(--muted);flex:1;min-width:200px}
+.bz.alertbz .bzhint{color:var(--ink)}
+.bzcode{display:flex;flex-direction:column;line-height:1.1;padding-right:12px;border-right:2px solid var(--line)}
+.bzcode span{font-size:.8rem;color:var(--muted);font-weight:600}
+.bzcode b{font-size:2rem;letter-spacing:.12em;font-family:ui-monospace,Menlo,Consolas,monospace}
+.bzcode small{color:var(--muted);font-size:.8rem}
+.bzline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+.bzempty{color:var(--muted);font-weight:600}
+.bzfront{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;border-radius:12px;background:#e3f6e8;border:3px solid var(--c);font-size:1.15rem}
+.bzfront small{color:var(--muted);font-size:.85rem}
+.bz .bzfront .ok,.bz .bzfront .no{border:0;color:#fff;padding:10px 14px}
+.bz .bzfront .ok{background:var(--good)}.bz .bzfront .no{background:var(--bad)}
+.bzchip{display:flex;align-items:center;gap:6px;padding:4px 4px 4px 8px;border-radius:999px;background:#f3efe6;border:2px solid var(--c);font-weight:600}
+.bzchip.wait{opacity:.75;border-style:dashed}
+.bzchip small{color:var(--muted)}
+.bzpos{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;font-weight:800}
+.bzpos.sm{width:22px;height:22px;font-size:.8rem}
+.bz .bzx{border:0;background:transparent;color:var(--muted);font-size:1.2rem;padding:2px 8px}
+.bz .bzlet{padding:3px 8px;font-size:.8rem}
+.bz .bzundo{border-style:dashed;color:var(--muted)}
+.bztools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bzlive{color:var(--good);font-weight:700;font-size:.85rem}
+.bzwarn{color:var(--bad);font-weight:700;font-size:.85rem}
+.filebtn{position:relative;display:inline-block;cursor:pointer;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}

@@ -1,0 +1,12 @@
+.c4wrap{margin:0 auto}
+.c4arrows{display:grid;gap:8px;padding:0 12px;margin-bottom:4px}
+.arrow{font-size:1.6rem;padding:4px 0;color:var(--muted)}
+.arrow:disabled{opacity:.12}
+.c4{display:grid;gap:8px;background:#2459c9;padding:12px;border-radius:18px;box-shadow:0 6px 18px rgba(36,89,201,.3)}
+.hole{aspect-ratio:1;border-radius:50%;background:#fff;position:relative;padding:0;cursor:default;box-shadow:inset 0 3px 6px rgba(0,0,0,.2)}
+.hole.can{cursor:pointer}
+.hole.can:hover{background:#fff7d6}
+.chip{position:absolute;inset:6%;border-radius:50%;background:var(--chip);box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.chip.drop{animation:drop .4s cubic-bezier(.45,0,.8,.5)}
+@keyframes drop{from{transform:translateY(calc(var(--r) * -112%))}to{transform:translateY(0)}}
+.hole.win .chip{box-shadow:0 0 0 5px #fff,0 0 0 9px #1f2328;animation:pop .6s ease 2}

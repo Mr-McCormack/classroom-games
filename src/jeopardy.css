@@ -1,0 +1,24 @@
+.jboard{display:grid;gap:8px;margin-bottom:18px}
+.jcat{background:#1e3a8a;color:#fff;font-weight:800;font-size:clamp(.85rem,1.5vw,1.2rem);padding:12px 8px;border-radius:10px;min-height:64px;text-transform:uppercase;letter-spacing:.02em;word-break:break-word}
+.jtile{background:#2451c9;color:#ffd24a;font-weight:800;font-size:clamp(1.4rem,3.4vw,2.6rem);padding:4px;height:clamp(56px,11vh,100px);border-radius:10px;text-shadow:0 2px 0 rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.jtile:hover{filter:brightness(1.12)}
+.jtile.played{background:var(--c);color:#fff;font-size:clamp(.8rem,1.3vw,1.05rem);opacity:.55;text-shadow:none}
+.jtile.played small{font-size:.8em;opacity:.85}
+.jtile.none{background:#9aa3b2}
+.jteams{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.jteam{background:#fff;border-radius:14px;padding:12px 14px;border-top:10px solid var(--c);box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px}
+.jteam .tname{font-size:1.15rem}
+.jscore{font-size:2.4rem;font-weight:800;line-height:1.1}
+.jteam.lead .jscore::after{content:" 👑";font-size:1.2rem}
+.jadj{display:flex;gap:6px}.jadj button{flex:1;padding:6px}
+.modal{position:fixed;inset:0;background:rgba(15,20,40,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.mbox{background:#fff;border-radius:20px;padding:26px;width:min(560px,100%);max-height:92vh;overflow:auto;text-align:center}
+.mcat{font-weight:800;text-transform:uppercase;color:#1e3a8a;font-size:1.3rem}
+.mval{font-size:4rem;font-weight:900;color:#2451c9;line-height:1.1}
+.mq{color:var(--muted);margin:4px 0 16px}
+.mteams{display:flex;flex-direction:column;gap:8px;text-align:left}
+.mrow{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#f7f4ee}
+.mrow .tlabel{margin-right:auto;font-size:1.1rem}
+.mrow button{padding:10px 14px}
+.mfoot{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.jtile.can{outline:4px dashed var(--warn);outline-offset:-4px}

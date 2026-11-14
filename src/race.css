@@ -1,0 +1,16 @@
+.lanes{display:flex;flex-direction:column;gap:10px}
+.lane{display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:12px;align-items:center;background:#fff;border-radius:14px;padding:10px 12px;border-left:10px solid var(--c);box-shadow:var(--sh)}
+.lname{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lname .tname{font-size:1.15rem}
+.lpos{color:var(--muted);font-weight:600;font-size:.95rem}
+.track{display:grid;gap:3px;overflow-x:auto}
+.sq{height:46px;border-radius:6px;background:#f3efe6;display:flex;align-items:center;justify-content:center;font-size:.9rem;min-width:0}
+.sq.start{background:#e4ded1}
+.sq.fin{background:repeating-conic-gradient(#222 0 25%,#fff 0 50%) 0 0/12px 12px}
+.sq.hz{background:#fff3c4}
+.car{display:block;width:100%;max-width:40px;position:relative;z-index:1}
+.car svg{width:100%;height:auto;display:block}
+.sq.fin .car{background:#fff;border-radius:4px;padding:2px}
+.lbtns{display:flex;gap:6px}
+.lbtns button{padding:10px 12px;min-width:46px}
+@media (max-width:860px){.lane{grid-template-columns:1fr}}

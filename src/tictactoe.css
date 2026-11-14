@@ -1,0 +1,6 @@
+.ttt{display:grid;gap:10px;width:min(100%,72vh);aspect-ratio:1;margin:0 auto}
+.cell{background:#fff;border-radius:14px;box-shadow:var(--sh);font-size:clamp(1.6rem,7vh,4.5rem);font-weight:800;display:flex;align-items:center;justify-content:center;border:4px solid transparent;cursor:default;transition:transform .12s}
+.cell.can{border:4px dashed var(--warn);cursor:pointer}
+.cell.can:hover{transform:scale(1.04)}
+.cell.line{box-shadow:inset 0 0 0 5px currentColor}
+.mark{font-weight:800;margin-right:6px;font-size:1.2rem}

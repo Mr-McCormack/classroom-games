@@ -1,0 +1,11 @@
+ctf capture-the-flag.html
+tictactoe tic-tac-toe-takeover.html
+connect4 connect-four.html
+tug tug-of-war.html
+race race-track.html
+battleship battleship.html
+jeopardy jeopardy-board.html
+bank bank-it-or-risk-it.html
+grudge grudge-ball.html
+picture mystery-picture.html
+risk risk.html

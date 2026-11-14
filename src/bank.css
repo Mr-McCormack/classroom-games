@@ -1,0 +1,15 @@
+.bkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.bk{background:#fff;border-radius:16px;padding:16px;border-top:12px solid var(--c);box-shadow:var(--sh);display:flex;flex-direction:column;gap:8px;transition:background .3s}
+.bk .tname{font-size:1.3rem}
+.bkbank{font-size:3.2rem;font-weight:800;line-height:1}
+.bkbank span{font-size:2rem;margin-right:6px}
+.bk.lead .bkbank::after{content:" 👑";font-size:1.4rem}
+.bklabel{color:var(--muted);font-weight:600;margin-top:-4px}
+.bkpot{background:#f3efe6;border-radius:10px;padding:10px;font-size:1.15rem}
+.bkpot.hot{background:#fff3c4}
+.bkpot b{font-size:1.5rem}
+.bk .ok{padding:14px;font-size:1.1rem}
+.bkrow{display:flex;gap:8px}
+.bkrow button{flex:1;padding:11px;font-weight:700}
+.bankbtn{background:#1d7bd8;color:#fff}
+.bk.bust{background:#fde8e8}

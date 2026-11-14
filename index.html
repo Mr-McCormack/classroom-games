@@ -17,14 +17,20 @@
   .em{font-size:2.2rem;line-height:1}
   .card b{display:block;font-size:1.2rem;margin-bottom:4px}
   .card span{color:var(--muted);line-height:1.4}
+  .buzz{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:26px 20px;margin:0 0 28px;border-radius:18px;background:#1d7bd8;color:#fff;text-decoration:none;font-size:1.8rem;font-weight:800;box-shadow:0 8px 0 #155ea6}
+  .buzz:active{transform:translateY(4px);box-shadow:0 4px 0 #155ea6}
+  .buzz small{display:block;font-size:1rem;font-weight:600;opacity:.9}
+  h2{font-size:1.2rem;color:var(--muted);margin:0 0 12px}
 </style>
 </head>
 <body>
 <main>
   <h1>🎲 Classroom Games</h1>
   <p class="lede">Students work on the worksheet. You run the scoreboard. Every game has undo, saves as you go, and lets you rename teams by clicking their names.</p>
+  <a class="buzz" href="buzz.html"><span>📣</span><span>Students: Buzz in<small>Get in line when your group has an answer</small></span></a>
+  <h2>Teacher: pick a game</h2>
   <div class="grid">
-    <a class="card" href="capture-the-flag.html" style="--c:#e63946"><div class="em">🚩</div><div><b>Capture the Flag</b><span>Right answer? Take a flag from another group.</span></div></a>
+    <a class="card" href="capture-the-flag.html" style="--c:#e63946"><div class="em">🚩</div><div><b>Capture the Flag</b><span>Right answer? Take a flag from another team.</span></div></a>
     <a class="card" href="grudge-ball.html" style="--c:#d64545"><div class="em">❌</div><div><b>Grudge Ball</b><span>Erase X's from other teams. Nobody is ever out.</span></div></a>
     <a class="card" href="tic-tac-toe-takeover.html" style="--c:#1d7bd8"><div class="em">⭕</div><div><b>Tic-Tac-Toe Takeover</b><span>Claim or steal squares. Lines earn bonus points.</span></div></a>
     <a class="card" href="connect-four.html" style="--c:#2459c9"><div class="em">🔴</div><div><b>Connect Four</b><span>Drop a chip for each right answer. Four in a row wins the round.</span></div></a>

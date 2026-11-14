@@ -1,0 +1,22 @@
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.fcard{background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--sh);border:4px solid transparent;display:flex;flex-direction:column;transition:transform .15s,border-color .15s}
+.fbar{height:12px}
+.fbody{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px}
+.fbody .tname{font-size:1.35rem}
+.fcount{font-size:3.6rem;font-weight:800;line-height:1}
+.fcount small{font-size:1rem;color:var(--muted);font-weight:600;margin-left:6px}
+.fcard.lead .fcount::after{content:" 👑";font-size:1.6rem}
+.flags{display:flex;flex-wrap:wrap;gap:3px;min-height:30px}
+.flags svg{width:24px;height:28px}
+.frow{display:flex;gap:8px}
+.frow .ok{flex:1;padding:14px;font-size:1.15rem}
+.frow .adj{width:46px;font-size:1.3rem}
+.fcard.out .fcount{color:#b8b2a6}
+.fcard.winner{border-color:var(--good);transform:scale(1.02)}
+.fcard.target{border-color:var(--warn);cursor:pointer}
+.fcard.target:hover{transform:scale(1.03);box-shadow:0 8px 24px rgba(244,163,0,.35)}
+.fcard.target.empty{border-color:transparent;opacity:.45;cursor:not-allowed}
+.fhint{display:none;padding:12px;text-align:center;font-weight:700;font-size:1.1rem;background:var(--warn);color:#fff;border-radius:10px}
+.fcard.target .fhint{display:block}
+.fcard.target.empty .fhint{background:#b8b2a6}
+.fcard.target .frow{display:none}

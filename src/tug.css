@@ -1,0 +1,13 @@
+.rope-area{position:relative;height:200px;background:#fff;border-radius:18px;box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.zone{position:absolute;top:0;bottom:0;width:8%;opacity:.85}.zone.left{left:0}.zone.right{right:0}
+.tick{position:absolute;top:30%;bottom:30%;width:2px;background:#ddd6c8;transform:translateX(-1px)}
+.tick.mid{background:#1f2328;width:4px;top:12%;bottom:12%;transform:translateX(-2px)}
+.rope{position:absolute;left:0;right:0;top:50%;height:16px;margin-top:-8px;background:repeating-linear-gradient(45deg,#c79a5b 0 8px,#a87b3f 8px 16px)}
+.knot{position:absolute;top:50%;width:26px;height:110px;margin-top:-55px;transform:translateX(-50%);background:#e63946;border-radius:8px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:left .45s cubic-bezier(.3,1.4,.5,1)}
+.tsides{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tside{background:#fff;border-radius:16px;padding:18px;border-top:12px solid var(--c);display:flex;flex-direction:column;gap:10px;box-shadow:var(--sh)}
+.tside .tname{font-size:1.5rem}
+.tw{font-size:3rem;font-weight:800;line-height:1}.tw small{font-size:1rem;color:var(--muted)}
+.away{color:var(--muted);font-weight:600;min-height:1.2em}
+.tside .ok{padding:18px;font-size:1.3rem}.tside .adj{padding:12px}
+@media (max-width:600px){.tsides{grid-template-columns:1fr}}

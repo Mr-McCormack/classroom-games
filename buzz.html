@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buzz In</title>
+<style>
+  :root{--bg:#f4f1ea;--card:#fff;--ink:#1f2328;--muted:#6b6f76;--line:#ddd6c8;--accent:#1d7bd8;--good:#2a9d4a;--bad:#d64545;--warn:#f4a300;--c:#1d7bd8}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  button{font:inherit;cursor:pointer;border:0;border-radius:14px;color:inherit;background:none}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  [hidden]{display:none!important}
+  main{max-width:640px;margin:0 auto;padding:40px 16px}
+  h1{margin:0 0 6px;font-size:2.4rem}
+  .lede{color:var(--muted);margin:0 0 24px;font-size:1.1rem}
+  .card{background:var(--card);border-radius:20px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+  label{display:block;font-weight:700;font-size:1.1rem;margin-bottom:10px}
+  #code{width:100%;font-size:3rem;font-weight:800;letter-spacing:.3em;text-align:center;text-transform:uppercase;padding:14px;border:3px solid var(--line);border-radius:14px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  #code:focus{outline:none;border-color:var(--accent)}
+  .primary{display:block;width:100%;margin-top:16px;padding:18px;font-size:1.3rem;font-weight:800;background:var(--accent);color:#fff}
+  .msg{min-height:1.4em;margin-top:12px;font-weight:600;color:var(--bad)}
+  .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:6px}
+  .teams button{padding:20px 14px;font-size:1.3rem;font-weight:800;color:#fff;background:var(--c);text-align:left}
+  .teams button:hover{filter:brightness(1.08)}
+  .who{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .who .sw{width:22px;height:22px;border-radius:50%;background:var(--c)}
+  .who b{font-size:1.7rem;margin-right:auto}
+  .link{color:var(--muted);text-decoration:underline;padding:4px 6px;font-size:.95rem}
+  .status{border-radius:16px;padding:20px;font-size:1.35rem;font-weight:700;text-align:center;background:#f3efe6;margin-bottom:18px;line-height:1.35}
+  .status small{display:block;font-size:1rem;font-weight:600;color:var(--muted);margin-top:6px}
+  .status.up{background:#e3f6e8;border:4px solid var(--good)}
+  .status.wait{background:#fff3c4}
+  .status.ok{background:#e3f6e8}
+  .status.no{background:#fde8e8}
+  .big{display:block;width:100%;padding:34px 16px;font-size:2rem;font-weight:900;color:#fff;background:var(--c);box-shadow:0 8px 0 rgba(0,0,0,.18);transition:transform .08s}
+  .big:active{transform:translateY(4px);box-shadow:0 4px 0 rgba(0,0,0,.18)}
+  .leave{display:block;width:100%;margin-top:14px;padding:14px;font-size:1.05rem;font-weight:700;background:#fff;border:2px solid var(--line)}
+  .pos{font-size:4rem;font-weight:900;line-height:1;display:block;margin:4px 0}
+  .game{color:var(--muted);font-weight:600;margin-bottom:6px}
+</style>
+</head>
+<body>
+<main>
+  <h1>📣 Buzz In</h1>
+  <p class="lede" id="lede">When your group has an answer, press the button. You'll get in line.</p>
+
+  <section class="card" id="joinView">
+    <label for="code">Game code (on the board)</label>
+    <input id="code" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text">
+    <button class="primary" id="joinBtn">Join</button>
+    <div class="msg" id="joinMsg"></div>
+  </section>
+
+  <section class="card" id="pickView" hidden>
+    <div class="game" id="pickGame"></div>
+    <label>Which team are you?</label>
+    <div class="teams" id="teams"></div>
+    <button class="link" id="pickBack" style="margin-top:14px">Use a different code</button>
+  </section>
+
+  <section class="card" id="mainView" hidden>
+    <div class="who"><span class="sw"></span><b id="teamName"></b><button class="link" id="switchBtn">Switch team</button></div>
+    <div class="status" id="status"></div>
+    <button class="big" id="buzzBtn">✋ We have an answer!</button>
+    <button class="leave" id="leaveBtn" hidden>Leave the line</button>
+  </section>
+</main>
+
+<script type="module">
+// Firebase: the same project as Hall Pass. Games live in their own "buzz" section of the database,
+// which never touches Hall Pass's data. These settings aren't passwords; the security rules protect the data.
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { initializeFirestore, doc, collection, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const firebaseConfig = {
+  apiKey: "AIzaSyCeHZwTuSiQRtfhuAOoqKRVX_bs12U0SV4",
+  authDomain: "hall-pass-5cf96.firebaseapp.com",
+  projectId: "hall-pass-5cf96",
+  storageBucket: "hall-pass-5cf96.firebasestorage.app",
+  messagingSenderId: "483428602738",
+  appId: "1:483428602738:web:d403721361c5d911b9c3eb"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+// Long polling gets through school web filters that block Firebase's normal streaming connection.
+const db = initializeFirestore(fbApp, { experimentalForceLongPolling: true });
+const roomRef = code => doc(db, 'buzz', code);
+const pressCol = code => collection(db, 'buzz', code, 'presses');
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let DEV = lsGet('buzz-dev');
+if (!DEV) { DEV = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join(''); lsSet('buzz-dev', DEV); }
+
+let CODE = null, TEAM = null, D = null, unsub = null, pending = null, pendTimer = null;
+
+function show(v) { ['joinView', 'pickView', 'mainView'].forEach(x => $(x).hidden = x !== v); }
+
+async function join(code, quiet) {
+  code = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 4) { if (!quiet) $('joinMsg').textContent = 'The code has 4 letters and numbers.'; return; }
+  $('joinBtn').disabled = true; $('joinMsg').textContent = '';
+  try {
+    const s = await getDoc(roomRef(code));
+    if (!s.exists()) { lsSet('buzz-code', null); show('joinView'); $('joinMsg').textContent = quiet ? '' : 'No game with that code. Check the board.'; return; }
+    CODE = code; D = s.data(); lsSet('buzz-code', code);
+    const t = lsGet('buzz-team-' + code);
+    TEAM = t != null && +t < (D.teams || []).length ? +t : null;
+    watch();
+    TEAM == null ? showPick() : (show('mainView'), render());
+  } catch (e) {
+    console.error(e);
+    $('joinMsg').textContent = "Can't connect right now. Check your internet and try again.";
+    show('joinView');
+  } finally { $('joinBtn').disabled = false; }
+}
+
+function watch() {
+  if (unsub) unsub();
+  unsub = onSnapshot(roomRef(CODE), s => {
+    if (!s.exists()) { ended(); return; }
+    D = s.data();
+    if (pending) {
+      const inLine = (D.queue || []).some(q => q.team === TEAM);
+      if ((pending === 'join' && inLine) || (pending === 'leave' && !inLine)) clearPending();
+    }
+    if (!$('pickView').hidden) showPick(); else if (!$('mainView').hidden) render();
+  }, e => { console.error(e); });
+}
+
+function ended() {
+  if (unsub) { unsub(); unsub = null; }
+  lsSet('buzz-code', null); CODE = null; TEAM = null; D = null; clearPending();
+  $('code').value = ''; show('joinView');
+  $('joinMsg').textContent = 'That game has ended. Type the new code from the board.';
+}
+
+function showPick() {
+  $('pickGame').textContent = D.game || '';
+  $('teams').innerHTML = (D.teams || []).map((t, i) => `<button data-t="${i}" style="--c:${esc(t.color)}">${esc(t.name)}</button>`).join('');
+  show('pickView');
+}
+
+function render() {
+  const teams = D.teams || [], me = teams[TEAM]; if (!me) { showPick(); return; }
+  document.documentElement.style.setProperty('--c', me.color);
+  $('teamName').textContent = me.name;
+  $('lede').textContent = D.game ? 'Playing ' + D.game + '.' : '';
+  const q = D.queue || [], cooled = t => D.coolOn && t === D.cool;
+  const mine = q.findIndex(x => x.team === TEAM), st = $('status');
+  const last = D.last && D.last.team === TEAM ? D.last : null;
+  if (mine >= 0) {
+    const entry = q[mine];
+    $('buzzBtn').hidden = true;
+    $('leaveBtn').hidden = entry.dev !== DEV;
+    const retry = last && last.r === 'no' ? 'Not yet! Fix it while you wait. ' : '';
+    if (cooled(TEAM)) {
+      st.className = 'status wait';
+      st.innerHTML = `${retry}You're in line.<small>Your team scored last, so another team goes first.</small>`;
+    } else {
+      let pos = 1; for (let k = 0; k < mine; k++) if (!cooled(q[k].team)) pos++;
+      if (pos === 1) { st.className = 'status up'; st.innerHTML = `🙋 You're up!<small>Your teacher is coming to check your answer.</small>`; }
+      else { st.className = 'status' + (retry ? ' no' : ''); st.innerHTML = `${retry}You're in line<span class="pos">#${pos}</span><small>Keep working while you wait.</small>`; }
+    }
+    if (entry.dev !== DEV) st.innerHTML += '<small>Your team got in line from another computer.</small>';
+  } else {
+    $('buzzBtn').hidden = false; $('leaveBtn').hidden = true;
+    $('buzzBtn').disabled = !!pending;
+    if (pending === 'join') { st.className = 'status'; st.innerHTML = pendTimer === 'slow' ? "Waiting for your teacher's screen…<small>Your teacher's game needs to be open.</small>" : 'Getting in line…'; }
+    else if (last && last.r === 'ok' && Date.now() - last.t < 5 * 60 * 1000) {
+      st.className = 'status ok';
+      st.innerHTML = `✓ Nice work! You scored.${cooled(TEAM) ? '<small>You can buzz in again, but another team goes before you next time.</small>' : ''}`;
+    } else { st.className = 'status'; st.innerHTML = 'Not in line.<small>Press the button when your group has an answer.</small>'; }
+  }
+}
+
+async function press(action) {
+  if (CODE == null || TEAM == null || pending) return;
+  pending = action; pendTimer = setTimeout(() => { pendTimer = 'slow'; render(); }, 8000);
+  render();
+  try { await addDoc(pressCol(CODE), { team: TEAM, action, at: serverTimestamp(), device: DEV }); }
+  catch (e) {
+    console.error(e); clearPending(); render();
+    $('status').className = 'status no'; $('status').innerHTML = "That didn't go through.<small>Check your internet and press again.</small>";
+  }
+}
+function clearPending() { if (pendTimer && pendTimer !== 'slow') clearTimeout(pendTimer); pending = null; pendTimer = null; }
+
+$('joinBtn').onclick = () => join($('code').value);
+$('code').addEventListener('keydown', e => { if (e.key === 'Enter') join($('code').value); });
+$('code').addEventListener('input', () => { $('code').value = $('code').value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+$('teams').onclick = e => {
+  const b = e.target.closest('[data-t]'); if (!b) return;
+  TEAM = +b.dataset.t; lsSet('buzz-team-' + CODE, TEAM); show('mainView'); render();
+};
+$('pickBack').onclick = () => { if (unsub) unsub(); unsub = null; CODE = null; lsSet('buzz-code', null); $('code').value = ''; show('joinView'); $('code').focus(); };
+$('switchBtn').onclick = () => { if (!pending) showPick(); };
+$('buzzBtn').onclick = () => press('join');
+$('leaveBtn').onclick = () => press('leave');
+
+const fromUrl = new URLSearchParams(location.search).get('code');
+const saved = fromUrl || lsGet('buzz-code');
+if (saved) { $('code').value = saved.toUpperCase(); join(saved, true); } else $('code').focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+.mapwrap{background:#bfdcef;border-radius:18px;padding:10px;box-shadow:var(--sh)}
+.map{width:100%;height:auto;display:block}
+.terr{stroke:#fff;stroke-width:3;stroke-linejoin:round;cursor:default;transition:opacity .2s}
+.terr.can{cursor:pointer;stroke:var(--hl);stroke-width:7;stroke-dasharray:12 7;animation:march 1s linear infinite}
+.terr.can:hover{opacity:.7}
+.terr.dim{opacity:.55}
+.terr.flash{animation:flash .7s ease}
+@keyframes march{to{stroke-dashoffset:-19}}
+@keyframes flash{0%{opacity:.15}100%{opacity:1}}
+.mapnote{text-align:center;color:#3c5a70;font-weight:600;margin-top:6px}
